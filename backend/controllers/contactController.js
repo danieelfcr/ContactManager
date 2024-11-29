@@ -15,12 +15,12 @@ const getContacts = asyncHandler(async (req, res) => {
 //@route GET /api/contacts/:id
 //@access private
 const getContact = asyncHandler(async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
-    console.log(contact)
+    const contact = await Contact.findOne({ _id: req.params.id, user_id: req.user.id });;
     if(!contact) {
         res.status(404);
         throw new Error('Contact not found') ;
     }
+
     res.status(200).json(contact)
 
 });
@@ -48,16 +48,10 @@ const createContact = asyncHandler(async (req, res) => {
 //@route PUT /api/contacts/:id
 //@access private
 const updateContact = asyncHandler(async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
+    const contact = await Contact.findOne({ _id: req.params.id, user_id: req.user.id });;
     if(!contact) {
         res.status(404);
         throw new Error('Contact not found')
-    }
-
-    //Verify contacts from users to avoid that one user updates other user's contacts
-    if(contact.user_id.toString() !== req.user.id) {
-        res.status(403);
-        throw new Error('User dont have permission to update other user contacts')
     }
 
     const updatedContact = await Contact.findByIdAndUpdate(
@@ -73,17 +67,12 @@ const updateContact = asyncHandler(async (req, res) => {
 //@route DELETE /api/contacts/:id
 //@access private
 const deleteContact = asyncHandler(async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
-    console.log(contact)
+    const contact = await Contact.findOne({ _id: req.params.id, user_id: req.user.id });;
     if(!contact) {
         res.status(404);
         throw new Error('Contact not found')
     }
-    //Verify contacts from users to avoid that one user updates other user's contacts
-    if(contact.user_id.toString() !== req.user.id) {
-        res.status(403);
-        throw new Error('User dont have permission to delete other user contacts')
-    }
+
     await Contact.deleteOne({_id: req.params.id});
     res.status(200).json(contact);
 });
